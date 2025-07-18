@@ -12,31 +12,56 @@
         }
         /* Estilos adicionais para a tabela, se necessário, além do Tailwind */
         th, td {
-            @apply px-4 py-2 text-left; /* Tailwind classes for padding and alignment */
+            @apply px-4 py-3 text-left; /* Increased padding for better spacing */
         }
         th {
-            @apply bg-blue-100 text-blue-800 font-semibold; /* Tailwind classes for header styling */
+            @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-sm uppercase tracking-wider rounded-t-lg; /* Modern header styling */
         }
         tr:nth-child(even) {
             @apply bg-gray-50; /* Zebra striping for table rows */
         }
         tr:hover {
-            @apply bg-blue-50; /* Hover effect for table rows */
+            @apply bg-blue-50 transition-colors duration-200 ease-in-out; /* Smooth hover effect */
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+            cursor: pointer; /* Add cursor pointer for better UX */
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-6 flex flex-col items-center">
+<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-4 sm:p-6 flex flex-col items-center justify-center">
 
-    <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl border border-gray-200">
-        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-8">
+    <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-5xl border border-gray-200 transform hover:scale-[1.005] transition-transform duration-300 ease-in-out">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-gray-800 mb-4 animate-fade-in">
             <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
                 🔎 Sistema de Busca de Leis Municipais
             </span>
         </h1>
 
-        <div class="mb-6 text-center">
-            <p id="loadingMessage" class="text-blue-600 mt-2 hidden">Carregando dados da planilha...</p>
-            <p id="errorMessage" class="text-red-600 mt-2 hidden"></p>
+        <!-- Developer Credit -->
+        <p class="text-center text-gray-600 text-sm mb-8">
+            Desenvolvido pelos servidores efetivos da Coordenadoria de Controle Interno do Município de Goiana/Pe.
+        </p>
+
+        <div class="mb-8 text-center space-y-3">
+            <p id="loadingMessage" class="text-blue-600 font-medium animate-pulse hidden">Carregando dados da planilha...</p>
+            <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
+            <p id="localFileWarning" class="text-orange-600 text-sm mt-2 p-2 bg-orange-50 rounded-lg border border-orange-200 hidden">
+                ⚠️ Se você abriu este arquivo diretamente do seu computador (file://), a busca pode não funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web local (ex: `python -m http.server` ou `http-server`).
+            </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -47,7 +72,7 @@
                     type="text"
                     id="ano"
                     placeholder="Ex: 2025"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out shadow-sm w-full"
+                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-gray-800"
                 >
             </div>
 
@@ -58,47 +83,75 @@
                     type="text"
                     id="palavra"
                     placeholder="Ex: orçamento"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out shadow-sm w-full"
+                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-gray-800"
                 >
             </div>
         </div>
 
-        <button onclick="buscarLeis()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200 ease-in-out mb-8">
-            Buscar
+        <button onclick="buscarLeis()" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 ease-in-out mb-8 text-lg">
+            Buscar Leis
         </button>
 
         <h2 class="text-2xl font-bold text-gray-700 mb-4 border-b-2 pb-2 border-blue-300">
             Resultados da Busca (<span id="resultsCount">0</span> leis encontradas):
         </h2>
 
+        <!-- Paginação: Itens por página e controles de navegação -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
+            <div class="flex items-center gap-2">
+                <label for="itemsPerPage" class="text-gray-700 text-sm font-semibold">Leis por página:</label>
+                <select id="itemsPerPage" class="p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out shadow-sm">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div id="paginationControls" class="flex items-center gap-2">
+                <button id="prevPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out text-sm" disabled>Anterior</button>
+                <span id="pageInfo" class="text-gray-700 text-sm font-medium">Página 1 de 1</span>
+                <button id="nextPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out text-sm" disabled>Próxima</button>
+            </div>
+        </div>
+
         <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
             <table id="tabelaResultados" class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
-                        <th>Ano</th>
+                        <th class="rounded-tl-lg">Ano</th>
                         <th>Número</th>
                         <th>Texto</th>
-                        <th>Link</th>
+                        <th class="rounded-tr-lg">Link</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Resultados serão inseridos aqui -->
                 </tbody>
             </table>
-            <p id="noResultsMessage" class="text-gray-600 text-center py-8 hidden">Nenhuma lei encontrada.</p>
+            <p id="noResultsMessage" class="text-gray-600 text-center py-8 hidden bg-white rounded-b-lg">Nenhuma lei encontrada.</p>
         </div>
     </div>
 
     <script>
         // URL da planilha CSV fornecido pelo usuário
         const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7ollrDhKhlyCtPnTQsMlFK2AmzNXA32LM1P7pvCzuJvaW6c23glm5-wbJWjrdzAKWydX2W81NidKK/pub?output=csv";
-        let dados = [];
+        let allLaws = []; // Armazena todos os dados carregados
+        let filteredLaws = []; // Armazena os dados após a filtragem de busca
+        let currentPage = 1;
+        let itemsPerPage = 10; // Valor inicial
 
         const tabelaResultadosBody = document.querySelector("#tabelaResultados tbody");
         const resultsCountSpan = document.getElementById("resultsCount");
         const loadingMessage = document.getElementById("loadingMessage");
         const errorMessage = document.getElementById("errorMessage");
         const noResultsMessage = document.getElementById("noResultsMessage");
+        const localFileWarning = document.getElementById("localFileWarning");
+
+        // Elementos de paginação
+        const itemsPerPageSelect = document.getElementById("itemsPerPage");
+        const prevPageBtn = document.getElementById("prevPageBtn");
+        const nextPageBtn = document.getElementById("nextPageBtn");
+        const pageInfoSpan = document.getElementById("pageInfo");
 
         // Função para exibir mensagens de erro
         function showErrorMessage(message) {
@@ -120,19 +173,29 @@
             resultsCountSpan.textContent = '0';
             noResultsMessage.classList.add('hidden'); // Esconde a mensagem de "nenhuma lei" enquanto carrega
 
+            // Verifica se o arquivo está sendo aberto localmente e exibe o aviso
+            if (window.location.protocol === 'file:') {
+                localFileWarning.classList.remove('hidden');
+                showErrorMessage('Falha ao carregar a planilha. Restrição de segurança do navegador (CORS).');
+                tabelaResultadosBody.innerHTML = `<tr><td colspan="4" class="text-center text-red-600 py-4">Erro: Execute em um servidor web.</td></tr>`;
+                return; // Impede a tentativa de fetch se for um arquivo local
+            } else {
+                localFileWarning.classList.add('hidden');
+            }
+
             try {
                 const resposta = await fetch(URL_CSV);
                 if (!resposta.ok) {
                     throw new Error(`Erro de rede ou URL inválido: ${resposta.status} ${resposta.statusText}`);
                 }
                 const texto = await resposta.text();
-                dados = csvParaJSON(texto);
-                console.log("✅ Dados carregados:", dados); // Para depuração
-                buscarLeis(); // Exibe todos os dados ou os dados filtrados se já houver termos de busca
+                allLaws = csvParaJSON(texto); // Carrega todos os dados
+                console.log("✅ Dados carregados:", allLaws); // Para depuração
+                buscarLeis(); // Filtra e exibe os dados (inicia na primeira página)
             } catch (error) {
                 console.error("Erro ao carregar dados:", error);
                 showErrorMessage(`Falha ao carregar a planilha: ${error.message}. Verifique o URL e as permissões de publicação.`);
-                tabelaResultadosBody.innerHTML = `<tr><td colspan="4" class="text-center text-red-600">Erro ao carregar dados.</td></tr>`;
+                tabelaResultadosBody.innerHTML = `<tr><td colspan="4" class="text-center text-red-600 py-4">Erro ao carregar dados.</td></tr>`;
                 resultsCountSpan.textContent = '0';
             } finally {
                 loadingMessage.classList.add('hidden');
@@ -170,7 +233,7 @@
             const anoFiltro = document.getElementById("ano").value.trim();
             const palavraFiltro = document.getElementById("palavra").value.trim().toLowerCase();
 
-            const filtrados = dados.filter(item => {
+            filteredLaws = allLaws.filter(item => {
                 const anoDoItem = item["ano"] || ""; // Garante que é uma string para comparação
                 const textoDoItem = item["texto"] || "";
 
@@ -179,35 +242,77 @@
                 return anoOk && palavraOk;
             });
 
-            exibirLeis(filtrados);
+            currentPage = 1; // Reseta para a primeira página ao fazer uma nova busca
+            exibirLeisPaginadas();
         }
 
-        function exibirLeis(lista) {
+        function exibirLeisPaginadas() {
             tabelaResultadosBody.innerHTML = "";
-            noResultsMessage.classList.add('hidden'); // Esconde a mensagem de "nenhuma lei" por padrão
+            noResultsMessage.classList.add('hidden');
 
-            if (!lista.length) {
+            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
+            pageInfoSpan.textContent = `Página ${currentPage} de ${totalPages || 1}`;
+
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages || filteredLaws.length === 0;
+
+            if (filteredLaws.length === 0) {
                 noResultsMessage.classList.remove('hidden');
                 resultsCountSpan.textContent = '0';
                 return;
             }
 
-            lista.forEach(item => {
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const lawsToDisplay = filteredLaws.slice(startIndex, endIndex);
+
+            lawsToDisplay.forEach(item => {
                 const linha = document.createElement("tr");
                 linha.innerHTML = `
-                    <td>${item["ano"] || ""}</td>
-                    <td>${item["número"] || item["numero"] || ""}</td>
-                    <td>${item["texto"] || ""}</td>
-                    <td><a href="${item["link da lei"] || item["link"] || "#"}" target="_blank" class="text-blue-600 hover:underline">📄 Acessar</a></td>
+                    <td class="py-3 pr-4 font-semibold text-gray-800">${item["ano"] || ""}</td>
+                    <td class="py-3 text-gray-700">${item["número"] || item["numero"] || ""}</td>
+                    <td class="py-3 text-gray-700">${item["texto"] || ""}</td>
+                    <td class="py-3">
+                        <a href="${item["link da lei"] || item["link"] || "#"}" target="_blank"
+                           class="inline-flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-200 ease-in-out text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L14.414 5A2 2 0 0115 6.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1-3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                            </svg>
+                            Acessar
+                        </a>
+                    </td>
                 `;
                 tabelaResultadosBody.appendChild(linha);
             });
-            resultsCountSpan.textContent = lista.length;
+            resultsCountSpan.textContent = filteredLaws.length;
         }
 
-        // Adiciona event listeners para os campos de busca para filtrar em tempo real
+        // Event Listeners para os campos de busca
         document.getElementById("ano").addEventListener("input", buscarLeis);
         document.getElementById("palavra").addEventListener("input", buscarLeis);
+
+        // Event Listener para o seletor de itens por página
+        itemsPerPageSelect.addEventListener("change", (e) => {
+            itemsPerPage = parseInt(e.target.value);
+            currentPage = 1; // Volta para a primeira página ao mudar o número de itens por página
+            exibirLeisPaginadas();
+        });
+
+        // Event Listeners para os botões de paginação
+        prevPageBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                currentPage--;
+                exibirLeisPaginadas();
+            }
+        });
+
+        nextPageBtn.addEventListener("click", () => {
+            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                exibirLeisPaginadas();
+            }
+        });
 
         // Carrega os dados ao iniciar a página
         carregarDados();
