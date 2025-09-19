@@ -4,16 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Busca de Leis Municipais</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        law: {
+                            navy: "#0B1C3F",
+                            navy2: "#122553",
+                            gold: "#C8A356",
+                        },
+                    },
+                    boxShadow: {
+                        soft: "0 8px 24px rgba(2,6,23,.08)",
+                    },
+                    fontFamily: {
+                        inter: ["Inter", "system-ui", "sans-serif"],
+                        merri: ["Merriweather", "serif"],
+                    },
+                },
+            },
+        };
+    </script>
     <style>
-        body {
-            font-family: "Inter", sans-serif;
-        }
+        body { font-family: "Inter", system-ui, sans-serif; }
+        
         /* Estilos base para todas as células da tabela (apenas padding vertical e alinhamento) */
-        th, td {
-            @apply py-3 text-left;
-        }
+        th, td { @apply py-3 text-left; }
+
         /* Preenchimento horizontal específico para cada coluna e LARGURAS FIXAS */
         th:nth-child(1), td:nth-child(1) { /* Coluna 'Ano' */
             @apply pl-8 pr-4;
@@ -45,89 +64,70 @@
             width: 12%; /* Largura fixa para o botão */
             min-width: 80px; /* Largura mínima para o botão */
         }
-
-        th {
-            @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-sm uppercase tracking-wider rounded-t-lg; /* Modern header styling */
-        }
-        tr:nth-child(even) {
-            @apply bg-gray-50; /* Zebra striping for table rows */
-        }
-        tr:hover {
-            @apply bg-blue-50 transition-colors duration-200 ease-in-out; /* Smooth hover effect */
-        }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-            cursor: pointer; /* Add cursor pointer for better UX */
-        }
+        
+        th { @apply bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg; }
+        
+        tr:nth-child(even) { @apply bg-white; }
+        tr:nth-child(odd) { @apply bg-slate-50; }
+        tr:hover { @apply bg-slate-100 transition-colors duration-200 ease-in-out; }
+        
+        /* Scrollbar do painel de resultados */
+        .scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
+        .scroll-area::-webkit-scrollbar-track { background:#e5e7eb; border-radius:10px; }
+        .scroll-area::-webkit-scrollbar-thumb { background:#9ca3af; border-radius:10px; }
+        .scroll-area::-webkit-scrollbar-thumb:hover { background:#6b7280; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 p-4 sm:p-6 flex flex-col items-center justify-center">
+<body class="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 p-4 sm:p-6 flex flex-col items-center justify-center">
 
-    <!-- Contêiner principal com altura fixa e layout flexível para dividir as seções -->
-    <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl w-full max-w-7xl border border-gray-200 flex flex-col h-[90vh]">
-        <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-gray-800 mb-4 animate-fade-in">
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                🔎 Sistema de Busca de Legislação Municipal Goiana/PE
-            </span>
-        </h1>
+    <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-soft w-full max-w-7xl border border-slate-200 flex flex-col h-[90vh]">
+        <div class="flex-shrink-0">
+            <h1 class="text-3xl sm:text-4xl font-bold text-center text-law-navy font-merri tracking-tight mb-4">
+                <span class="inline-flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-law-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-2.21 0-4 1.79-4 4v1H6a3 3 0 00-3 3v2h2.09a5 5 0 009.82 0H17V11a3 3 0 00-3-3h-2V7c0-1.1.9-2 2-2h4V3h-6zm-5 9a3 3 0 116 0H7zM4 17h16v2H4v-2z"/></svg>
+                    Busca de Legislação Municipal
+                </span>
+            </h1>
 
-        <!-- Developer Credit -->
-        <p class="text-center text-gray-600 text-sm mb-8">
-            Desenvolvido pelos servidores efetivos da Coordenadoria de Controle Interno do Município de Goiana/Pe.
-        </p>
-
-        <div class="mb-8 text-center space-y-3">
-            <p id="loadingMessage" class="text-blue-600 font-medium animate-pulse hidden">Carregando dados da planilha...</p>
-            <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
-            <p id="localFileWarning" class="text-orange-600 text-sm mt-2 p-2 bg-orange-50 rounded-lg border border-orange-200 hidden">
-                ⚠️ Se você abriu este arquivo diretamente do seu seu computador (file://), a busca pode não funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web local (ex: `python -m http.server` ou `http-server`).
+            <p class="text-center text-slate-600 text-sm mt-2 mb-8">
+                Desenvolvido pela Coordenadoria de Controle Interno do Município de Goiana/Pe.
             </p>
-        </div>
 
-        <!-- Campos de busca originais e novos filtros (altura não se expande) -->
+            <div class="mb-8 text-center space-y-3">
+                <p id="loadingMessage" class="text-law-navy font-medium animate-pulse hidden">Carregando dados da planilha...</p>
+                <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
+                <p id="localFileWarning" class="text-amber-700 text-sm mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200 hidden">
+                    ⚠️ Se você abriu este arquivo diretamente do seu seu computador (file://), a busca pode não funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web local (ex: `python -m http.server` ou `http-server`).
+                </p>
+            </div>
+        </div>
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 flex-shrink-0">
-            <!-- Campo de busca por Ano -->
             <div class="flex flex-col">
-                <label for="ano" class="text-gray-700 text-sm font-semibold mb-2">Ano:</label>
+                <label for="ano" class="text-slate-700 text-sm font-semibold mb-2">Ano:</label>
                 <input
                     type="text"
                     id="ano"
                     placeholder="Ex: 2025"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-gray-800"
+                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800"
                 >
             </div>
 
-            <!-- Adição do filtro de Tipo -->
             <div class="flex flex-col">
-                <label for="tipo" class="text-gray-700 text-sm font-semibold mb-2">Tipo:</label>
-                <select id="tipo" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-gray-800">
+                <label for="tipo" class="text-slate-700 text-sm font-semibold mb-2">Tipo:</label>
+                <select id="tipo" class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
                     <option value="">Todos</option>
                     <option value="Ordinária">Lei Ordinária</option>
                     <option value="Complementar">Lei Complementar</option>
                     <option value="Emenda lei orgânica">Emenda lei orgânica</option>
                     <option value="Decreto">Decreto</option>
                     <option value="Decreto orçamentário">Decreto orçamentário</option>
-                    
                 </select>
             </div>
 
-            <!-- Adição do filtro de Categoria -->
             <div class="flex flex-col lg:col-span-2">
-                <label for="categoria" class="text-gray-700 text-sm font-semibold mb-2">Categoria:</label>
-                <select id="categoria" class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-gray-800">
+                <label for="categoria" class="text-slate-700 text-sm font-semibold mb-2">Categoria:</label>
+                <select id="categoria" class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
                     <option value="">Todas</option>
                     <option value="ASSISTÊNCIA SOCIAL">ASSISTÊNCIA SOCIAL</option>
                     <option value="COMÉRCIO E INDÚSTRIA">COMÉRCIO E INDÚSTRIA</option>
@@ -149,29 +149,26 @@
                 </select>
             </div>
 
-            <!-- Campo de busca por Palavra-chave -->
             <div class="flex flex-col lg:col-span-4">
-                <label for="palavra" class="text-gray-700 text-sm font-semibold mb-2">Palavra-chave (Nº de Lei/Título/Ementa/Descrição):</label>
+                <label for="palavra" class="text-slate-700 text-sm font-semibold mb-2">Palavra-chave (Nº de Lei/Título/Ementa/Descrição):</label>
                 <input
                     type="text"
                     id="palavra"
                     placeholder="Ex: orçamento, licitação, servidor"
-                    class="p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-gray-800"
+                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800"
                 >
             </div>
         </div>
 
-        <!-- Nova caixa separada para os resultados da pesquisa, que irá rolar -->
-        <div class="mt-8 p-6 bg-gray-50 rounded-lg shadow-inner border border-gray-100 flex-grow overflow-y-auto">
-            <h2 class="text-2xl font-bold text-gray-700 mb-4 border-b-2 pb-2 border-blue-300">
+        <div class="scroll-area mt-8 p-6 bg-slate-50 rounded-lg shadow-inner border border-slate-100 flex-grow overflow-y-auto">
+            <h2 class="text-2xl font-bold text-slate-700 mb-4 border-b-2 pb-2 border-law-gold/50">
                 Resultados da pesquisa (<span id="resultsCount">0</span> Leis e Decretos encontrados):
             </h2>
 
-            <!-- Paginação: Itens por página e controles de navegação -->
             <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0">
                 <div class="flex items-center gap-2">
-                    <label for="itemsPerPage" class="text-gray-700 text-sm font-semibold">Leis por página:</label>
-                    <select id="itemsPerPage" class="p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 transition duration-200 ease-in-out shadow-sm">
+                    <label for="itemsPerPage" class="text-slate-700 text-sm font-semibold">Leis por página:</label>
+                    <select id="itemsPerPage" class="p-2 border border-slate-300 rounded-md focus:ring-law-navy focus:border-law-navy transition duration-200 ease-in-out shadow-sm">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
@@ -179,22 +176,20 @@
                     </select>
                 </div>
                 <div id="paginationControls" class="flex items-center gap-2">
-                    <!-- Botão "Primeira" adicionado -->
-                    <button id="startIndexPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out text-sm" disabled>Primeira</button>
-                    <button id="prevPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out text-sm" disabled>Anterior</button>
-                    <span id="pageInfo" class="text-gray-700 text-sm font-medium">Página 1 de 1</span>
-                    <button id="nextPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out text-sm" disabled>Próxima</button>
-                    <button id="endIndexPageBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200 ease-in-out text-sm" disabled>Última</button>
+                    <button id="startIndexPageBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50" disabled>Primeira</button>
+                    <button id="prevPageBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50" disabled>Anterior</button>
+                    <span id="pageInfo" class="text-slate-700 text-sm font-medium">Página 1 de 1</span>
+                    <button id="nextPageBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50" disabled>Próxima</button>
+                    <button id="endIndexPageBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-2 px-4 rounded-md transition text-sm disabled:opacity-50" disabled>Última</button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
-                <table id="tabelaResultados" class="min-w-full divide-y divide-gray-200 table-fixed">
+            <div class="overflow-x-auto rounded-lg shadow-md border border-slate-200">
+                <table id="tabelaResultados" class="min-w-full divide-y divide-slate-200 table-fixed">
                     <thead>
                         <tr>
                             <th class="rounded-tl-lg">Ano</th>
                             <th>Número</th>
-                            <!-- Adição dos novos cabeçalhos -->
                             <th>Tipo</th>
                             <th>Categoria</th>
                             <th>Descrição</th>
@@ -202,10 +197,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Resultados serão inseridos aqui -->
-                    </tbody>
+                        </tbody>
                 </table>
-                <p id="noResultsMessage" class="text-gray-600 text-center py-8 hidden bg-white rounded-b-lg">Nenhuma lei encontrada.</p>
+                <p id="noResultsMessage" class="text-slate-600 text-center py-8 hidden bg-white rounded-b-lg">Nenhuma lei encontrada.</p>
             </div>
         </div>
     </div>
@@ -367,17 +361,20 @@
             const endIndex = startIndex + itemsPerPage;
             const lawsToDisplay = filteredLaws.slice(startIndex, endIndex);
 
-            lawsToDisplay.forEach(item => {
+            lawsToDisplay.forEach((item, idx) => {
                 const linha = document.createElement("tr");
+                const bgClass = idx % 2 === 0 ? "bg-white" : "bg-slate-50";
+
+                linha.className = `${bgClass} hover:bg-slate-100 transition-colors`;
                 linha.innerHTML = `
-                    <td class="py-3 pr-4 font-semibold text-gray-800">${item["ano"] || ""}</td>
-                    <td class="py-3 text-gray-700">${item["número"] || item["numero"] || ""}</td>
-                    <td class="py-3 text-gray-700">${item["tipo"] || ""}</td>
-                    <td class="py-3 text-gray-700">${item["categoria"] || ""}</td>
-                    <td class="py-3 text-gray-700 break-words">${item["descrição"] || ""}</td>
+                    <td class="py-3 pr-4 font-semibold text-slate-800">${item["ano"] || ""}</td>
+                    <td class="py-3 text-slate-700">${item["número"] || item["numero"] || ""}</td>
+                    <td class="py-3 text-slate-700">${item["tipo"] || ""}</td>
+                    <td class="py-3 text-slate-700">${item["categoria"] || ""}</td>
+                    <td class="py-3 text-slate-700 break-words">${item["descrição"] || ""}</td>
                     <td class="py-3">
                         <a href="${item["link da lei"] || item["link"] || "#"}" target="_blank"
-                           class="inline-flex items-center justify-center gap-1 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-200 ease-in-out text-sm">
+                           class="inline-flex items-center justify-center gap-1 bg-law-navy hover:bg-law-navy2 active:bg-law-navy2 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-200 ease-in-out text-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L14.414 5A2 2 0 0115 6.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1-3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
                             </svg>
