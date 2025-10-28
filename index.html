@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legislação Municipal Goiana</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>ACERVO JURÍDICO E NORMATIVO MUNICIPAL</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/google/material-design-icons/master/png/image_folder/materialicons/folder_black_48dp.png" type="image/png" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet" />
     <script>
         tailwind.config = {
             theme: {
@@ -15,9 +17,13 @@
                             navy2: "#122553",
                             gold: "#C8A356",
                         },
+                        search: {
+                            dark: "#4a4a4a",
+                            active: "#00bcd4",
+                        }
                     },
                     boxShadow: {
-                        soft: "0 8px 24px rgba(2,6,23,.08)",
+                        soft: "0 8px 24px rgba(0,0,0,.12)",
                     },
                     fontFamily: {
                         inter: ["Inter", "system-ui", "sans-serif"],
@@ -29,452 +35,743 @@
     </script>
     <style>
         body { font-family: "Inter", system-ui, sans-serif; }
-    
-    /* Estilos base para todas as células da tabela */
-    th, td { 
-        @apply py-3 text-left; 
-    }
+        mark { background: #fde68a; padding: 0 .15em; border-radius: .2rem; }
+        .btn-category.active {
+            background-color: #C8A356;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,.1);
+        }
+        .scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
+        .scroll-area::-webkit-scrollbar-track { background:#e5e7eb; border-radius:10px; }
+        .scroll-area::-webkit-scrollbar-thumb { background:#9ca3af; border-radius:10px; }
+        .scroll-area::-webkit-scrollbar-thumb:hover { background:#6b7280; }
 
-    /* Estilo padrão (Mobile-First): Reduz o padding para telas pequenas */
-    th, td { 
-        @apply px-2 text-xs; /* Reduz o padding horizontal em geral e o tamanho da fonte */
-    }
+        /* Barra de pesquisa recolhível */
+        #searchContainer {
+            display: flex;
+            align-items: center;
+            position: relative;
+            max-width: 60px;
+            height: 56px;
+            transition: max-width 0.28s cubic-bezier(.4,0,.2,1), background-color 0.28s;
+            border-radius: 9999px;
+            background-color: #00bcd4;
+            box-shadow: 0 6px 18px rgba(0,0,0,.12);
+            overflow: hidden;
+        }
+        #searchContainer.expanded { max-width: 680px; background-color: #4a4a4a; }
+        #searchButton {
+            flex-shrink: 0;
+            width: 56px;
+            height: 56px;
+            background-color: #00bcd4;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            border-radius: 9999px;
+            z-index: 20;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+        #searchNome {
+            flex-grow: 1;
+            background-color: transparent;
+            color: white;
+            padding: 0 1.25rem 0 1.25rem;
+            font-size: 1rem;
+            outline: none;
+            border: none;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 0.18s ease-in 0.06s;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #searchContainer.expanded #searchNome {
+            opacity: 1;
+            pointer-events: auto;
+            padding-right: 90px;
+        }
+        #searchContainer.expanded #searchButton {
+            border-radius: 0 9999px 9999px 0;
+            left: auto;
+            right: 0;
+            background-color: #00bcd4;
+        }
 
-    /* Torna o cabeçalho da tabela FIXO */
-    #tabelaResultados thead { 
-        @apply sticky top-0 z-10; 
-    }
+        /* Table layout specifics */
+        col.col-ano { width: 6%; }
+        col.col-numero { width: 8%; }
+        col.col-tipo { width: 18%; }
+        col.col-categoria { width: 16%; }
+        col.col-descricao { width: 48%; }
+        col.col-link { width: 6%; }
 
-    /* ESTILOS DE LARGURA RESPONSIVOS (Larguras em 'sm' para telas maiores e flexibilidade para o celular) */
-
-    /* Colunas Ano e Tipo: Priorizar largura mínima absoluta no mobile */
-    th:nth-child(1), td:nth-child(1) { /* Coluna 'Ano' */
-        min-width: 50px; 
-    }
-    th:nth-child(3), td:nth-child(3) { /* Coluna 'Tipo' */
-        min-width: 80px; 
-    }
-    th:nth-child(4), td:nth-child(4) { /* Coluna 'Categoria' */
-        min-width: 100px; 
-    }
-    th:nth-child(2), td:nth-child(2) { /* Coluna 'Número' */
-        min-width: 60px; 
-    }
-
-    /* Coluna 'Descrição': Deve ocupar o espaço restante, mas ter uma largura mínima legível */
-    th:nth-child(5), td:nth-child(5) { 
-        min-width: 250px; /* Reduz a largura mínima para caber em telas menores */
-        width: 50%; /* Ajuda na distribuição em telas maiores */
-    }
-    
-    /* Coluna 'Link': Largura fixa e centrada, priorizando o botão */
-    th:nth-child(6), td:nth-child(6) { 
-        @apply pr-8 text-center;
-        width: 80px; /* Largura mínima para o botão "Acessar" */
-        min-width: 120px;
-    }
-
-    /* Aumenta o padding e a fonte para telas maiores (sm) */
-    @media (min-width: 640px) {
-        th, td { @apply py-3 px-4 text-sm; }
-        th:nth-child(1), td:nth-child(1) { @apply pl-8; } /* Restaura o padding maior no Ano */
-        th:nth-child(6), td:nth-child(6) { @apply pr-4; } /* Restaura o padding maior no Link */
-    }
-    
-    /* Estilos de cor e destaque */
-    th { @apply bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-t-lg; }
-    tr:nth-child(even) { @apply bg-white; }
-    tr:nth-child(odd) { @apply bg-slate-50; }
-    tr:hover { @apply bg-slate-100 transition-colors duration-200 ease-in-out; }
-    mark { @apply bg-law-gold bg-opacity-40 rounded px-1 font-medium text-law-navy; }
-
-    /* Scrollbar do painel de resultados (Sem alteração) */
-    .scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
-    .scroll-area::-webkit-scrollbar-track { background:#e5e7eb; border-radius:10px; }
-    .scroll-area::-webkit-scrollbar-thumb { background:#9ca3af; border-radius:10px; }
-    .scroll-area::-webkit-scrollbar-thumb:hover { background:#6b7280; }
+        th { padding-top: .75rem; padding-bottom: .75rem; text-align: left; }
+        td { padding-top: .75rem; padding-bottom: .75rem; text-align: left; }
+        #tabelaResultados thead th[data-column] { cursor: pointer; user-select: none; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 p-4 sm:p-6 flex flex-col items-center ">
+<body class="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 p-4 sm:p-6 flex flex-col items-center">
 
-    <div class="bg-white p-2 sm:p-2 rounded-3xl shadow-soft w-full max-w-7xl border border-slate-200 flex flex-col h-[90vh]">
-        <div class="flex-shrink-0">
-            <h1 class="text-3xl sm:text-4xl font-normal text-center text-law-navy font-weight tracking-tight mb-8">
+    <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-soft w-full max-w-8xl border border-slate-200 flex flex-col h-[90vh]">
+        <header class="flex-shrink-0 mb-4">
+            <h1 class="text-3xl sm:text-4xl font-bold text-center text-law-navy font-merri tracking-tight mb-2">
                 <span class="inline-flex items-center gap-3">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-law-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-2.21 0-4 1.79-4 4v1H6a3 3 0 00-3 3v2h2.09a5 5 0 009.82 0H17V11a3 3 0 00-3-3h-2V7c0-1.1.9-2 2-2h4V3h-6zm-5 9a3 3 0 116 0H7zM4 17h16v2H4v-2z"/></svg>
-                    Acervo Jurídico e Normativo do Município de Goiana
+                    ACERVO JURÍDICO E NORMATIVO MUNICIPAL
                 </span>
             </h1>
+            <p class="text-center text-slate-600 text-sm">Coordenadoria do Sistema de Controle Interno - Prefeitura Muncipal de Goiana/PE</p>
+        </header>
 
-            
-
-            <div class="mb-8 text-center space-y-3">
-                <p id="loadingMessage" class="text-law-navy font-medium animate-pulse hidden">Carregando dados da planilha...</p>
-                <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
-                <p id="localFileWarning" class="text-amber-700 text-sm mt-2 p-2 bg-amber-50 rounded-lg border border-amber-200 hidden">
-                    ⚠️ Se você abriu este arquivo diretamente do seu seu computador (file://), a busca pode não funcionar devido a restrições de segurança do navegador. Por favor, execute-o em um servidor web local (ex: `python -m http.server` ou `http-server`).
-                </p>
-            </div>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4 flex-shrink-0">
-            <div class="flex flex-col">
-                <label for="ano" class="text-slate-700 text-sm font-semibold mb-1">Ano:</label>
-                <input
-                    type="text"
-                    id="ano"
-                    placeholder="Ex: 2025"
-                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800"
-                >
+        <!-- Top controls: search (recolhível) + filter toggle -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 justify-between">
+            <div class="flex items-center justify-center w-full sm:w-auto mb-2 sm:mb-0">
+                <div id="searchWrapper" class="w-full max-w-2xl">
+                    <div id="searchContainer" class="mx-auto">
+                        <input id="searchNome" type="text" placeholder="Pesquise por número, ementa, tema ou trecho..." />
+                        <button id="searchButton" aria-label="Pesquisar">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex flex-col">
-                <label for="tipo" class="text-slate-700 text-sm font-semibold mb-2">Tipo:</label>
-                <select id="tipo" class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
-                    <option value="">Todos</option>
-                    <option value="Ordinária">Lei Ordinária</option>
-                    <option value="Complementar">Lei Complementar</option>
-                    <option value="Emenda lei orgânica">Emenda lei orgânica</option>
-                    <option value="Decreto">Decreto</option>
-                    <option value="Decreto orçamentário">Decreto orçamentário</option>
-                    <option value="Instrução Normativa">Instrução Normativa</option>
-                </select>
-            </div>
-
-            <div class="flex flex-col lg:col-span-2">
-                <label for="categoria" class="text-slate-700 text-sm font-semibold mb-2">Categoria:</label>
-                <select id="categoria" class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800">
-                    <option value="">Todas</option>
-                    <option value="ASSISTÊNCIA SOCIAL">ASSISTÊNCIA SOCIAL</option>
-                    <option value="COMÉRCIO E INDÚSTRIA">COMÉRCIO E INDÚSTRIA</option>
-                    <option value="CONSELHOS MUNICIPAIS">CONSELHOS MUNICIPAIS</option>
-                    <option value="CULTURA">CULTURA</option>
-                    <option value="DESAPROPRIAÇÃO">DESAPROPRIAÇÃO</option>
-                    <option value="EDUCAÇÃO">EDUCAÇÃO</option>
-                    <option value="INCENTIVOS FISCAIS">INCENTIVOS FISCAIS</option>
-                    <option value="LICITAÇÕES E CONTRATOS">LICITAÇÕES E CONTRATOS</option>
-                    <option value="MEIO AMBIENTE">MEIO AMBIENTE</option>
-                    <option value="OBRAS E EDIFICAÇÕES">OBRAS E EDIFICAÇÕES</option>
-                    <option value="ORÇAMENTO E FINANÇAS">ORÇAMENTO E FINANÇAS</option>
-                    <option value="OUTROS">OUTROS</option>
-                    <option value="PLANEJAMENTO URBANO">PLANEJAMENTO URBANO</option>
-                    <option value="PREVIDÊNCIA">PREVIDÊNCIA</option>
-                    <option value="REFORMA ADMINSITRATIVA">REFORMA ADMINSITRATIVA</option>
-                    <option value="SAÚDE PÚBLICA">SAÚDE PÚBLICA</option>
-                    <option value="SEGURANÇA PÚBLICA">SEGURANÇA PÚBLICA</option>
-                    <option value="SERVIDORES PÚBLICOS">SERVIDORES PÚBLICOS</option>
-                </select>
-            </div>
-
-            <div class="flex flex-col lg:col-span-4">
-                <label for="palavra" class="text-slate-700 text-sm font-semibold mb-2">Palavra-chave (Nº de Lei/Título/Ementa/Descrição):</label>
-                <input
-                    type="text"
-                    id="palavra"
-                    placeholder="Ex: orçamento, licitação, servidor"
-                    class="p-3 border border-slate-300 rounded-lg focus:ring-law-navy focus:border-law-navy transition duration-300 ease-in-out shadow-sm hover:shadow-md focus:shadow-lg w-full text-slate-800"
-                >
+            <div class="flex items-center gap-3">
+                <button id="toggleFiltersBtn" class="flex items-center gap-2 bg-law-navy text-white px-4 py-3 rounded-full hover:bg-law-navy2 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" id="filterIcon" class="h-5 w-5 transform transition-transform" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    <span class="font-semibold">Filtros</span>
+                </button>
             </div>
         </div>
 
-        <div class="mt-2 p-6 bg-slate-20 rounded-lg shadow-inner border border-slate-200 flex-grow flex flex-col overflow-hidden"> 
-            
-            <h2 class="text-2xl font-bold text-slate-700 mb-4 border-b-2 pb-2 border-law-gold/50 flex-shrink-0">
-                Resultados da pesquisa (<span id="resultsCount">0</span> Arquivos encontrados):
-            </h2>
-            
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 space-y-4 sm:space-y-0 flex-shrink-0">
-                <div class="flex items-center space-x-2">
-                    <label for="itemsPerPage" class="text-slate-600 text-sm">Resultados por página:</label>
-                    <select id="itemsPerPage" class="p-2 border border-slate-300 rounded-lg text-sm shadow-sm">
+        <!-- Filtros expandidos -->
+        <div id="filterContent" class="mb-6 border border-slate-200 rounded-xl bg-white p-4 sm:p-5 hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="text-slate-700 text-sm font-semibold mb-1 block">Ano</label>
+                    <input id="ano" type="text" placeholder="Ex: 2025" class="p-3 border border-slate-300 rounded-lg w-full" />
+                </div>
+                <div>
+                    <label class="text-slate-700 text-sm font-semibold mb-1 block">Tipo</label>
+                    <select id="tipo" class="p-3 border border-slate-300 rounded-lg w-full">
+                        <option value="">Todos</option>
+                        <option value="Lei Ordinária">Lei Ordinária</option>
+                        <option value="Lei Complementar">Lei Complementar</option>
+                        <option value="Emenda lei orgânica">Emenda lei orgânica</option>
+                        <option value="Decreto">Decreto</option>
+                        <option value="Decreto orçamentário">Decreto orçamentário</option>
+                        <option value="Instrução Normativa">Instrução Normativa</option>
+                    </select>
+                </div>
+                <div class="lg:col-span-2">
+                    <label class="text-slate-700 text-sm font-semibold mb-1 block">Categoria</label>
+                    <select id="categoria" class="p-3 border border-slate-300 rounded-lg w-full">
+                        <option value="">Todas</option>
+                        <option value="ASSISTÊNCIA SOCIAL">ASSISTÊNCIA SOCIAL</option>
+                        <option value="COMÉRCIO E INDÚSTRIA">COMÉRCIO E INDÚSTRIA</option>
+                        <option value="CONSELHOS MUNICIPAIS">CONSELHOS MUNICIPAIS</option>
+                        <option value="CULTURA">CULTURA</option>
+                        <option value="DESAPROPRIAÇÃO">DESAPROPRIAÇÃO</option>
+                        <option value="EDUCAÇÃO">EDUCAÇÃO</option>
+                        <option value="INCENTIVOS FISCAIS">INCENTIVOS FISCAIS</option>
+                        <option value="LICITAÇÕES E CONTRATOS">LICITAÇÕES E CONTRATOS</option>
+                        <option value="MEIO AMBIENTE">MEIO AMBIENTE</option>
+                        <option value="OBRAS E EDIFICAÇÕES">OBRAS E EDIFICAÇÕES</option>
+                        <option value="ORÇAMENTO E FINANÇAS">ORÇAMENTO E FINANÇAS</option>
+                        <option value="OUTROS">OUTROS</option>
+                        <option value="PLANEJAMENTO URBANO">PLANEJAMENTO URBANO</option>
+                        <option value="PREVIDÊNCIA">PREVIDÊNCIA</option>
+                        <option value="REFORMA ADMINSITRATIVA">REFORMA ADMINSITRATIVA</option>
+                        <option value="SAÚDE PÚBLICA">SAÚDE PÚBLICA</option>
+                        <option value="SEGURANÇA PÚBLICA">SEGURANÇA PÚBLICA</option>
+                        <option value="SERVIDORES PÚBLICOS">SERVIDORES PÚBLICOS</option>
+                    </select>
+                </div>
+
+                <div class="lg:col-span-4">
+                    <label class="text-slate-700 text-sm font-semibold mb-1 block">Palavra-chave (Nº/Título/Ementa/Descrição)</label>
+                    <input id="palavra" type="text" placeholder="Ex: orçamento, licitação, servidor" class="p-3 border border-slate-300 rounded-lg w-full" />
+                </div>
+            </div>
+
+            <!-- Botões de categorias dinâmicas (gerados a partir do CSV) -->
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <label class="text-slate-700 text-sm font-semibold mb-2 block">Filtrar por Tipo (rápido):</label>
+                <div id="categoryButtonsContainer" class="flex flex-wrap gap-2"></div>
+            </div>
+        </div>
+
+        <!-- Mensagens e controles de resultado -->
+        <div class="mb-3 text-center space-y-2">
+            <p id="loadingMessage" class="text-law-navy font-medium animate-pulse hidden">Carregando dados da planilha…</p>
+            <p id="errorMessage" class="text-red-600 font-medium hidden"></p>
+            <p id="localFileWarning" class="text-amber-700 text-sm p-2 bg-amber-50 rounded-lg border border-amber-200 hidden">
+                ⚠️ Se abriu o arquivo via <code>file://</code>, a busca pode não funcionar por CORS. Execute em servidor local (ex: <code>python -m http.server</code>).
+            </p>
+        </div>
+
+        <!-- Resultados + Paginação -->
+        <div class="mt-2 p-4 bg-slate-20 rounded-lg shadow-inner border border-slate-200 flex-grow flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-law-navy">
+                    Resultados (<span id="resultsCount">0</span>)
+                </h2>
+                <div class="flex items-center gap-3">
+                    <label class="text-slate-600 text-sm">Por página:</label>
+                    <select id="itemsPerPage" class="p-2 border border-slate-300 rounded-md">
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                     </select>
                 </div>
-                
-                <div class="flex items-center space-x-2">
-                    <button id="startIndexPageBtn" class="px-3 py-1 bg-slate-300 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150">Primeira</button>
-                    <button id="prevPageBtn" class="px-3 py-1 bg-slate-300 text-slate-700 rounded-md text-sm font-medium hover:bg-slate-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150">Anterior</button>
-                    <span id="pageInfo" class="px-3 py-1 text-sm font-semibold text-law-navy">Página 1 de 1</span>
-                    <button id="nextPageBtn" class="px-3 py-1 bg-law-navy text-white rounded-md text-sm font-medium hover:bg-law-navy2 disabled:bg-slate-300 disabled:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150">Próxima</button>
-                    <button id="endIndexPageBtn" class="px-3 py-1 bg-law-navy text-white rounded-md text-sm font-medium hover:bg-law-navy2 disabled:bg-slate-300 disabled:text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150">Última</button>
+            </div>
+
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-sm" id="pageInfo">Página 1 de 1</div>
+                <div class="flex gap-2">
+                    <button id="startIndexPageBtn" class="px-3 py-1 bg-slate-200 text-slate-900 rounded-md disabled:opacity-50" disabled>Primeira</button>
+                    <button id="prevPageBtn" class="px-3 py-1 bg-slate-200 text-slate-900 rounded-md disabled:opacity-50" disabled>Anterior</button>
+                    <button id="nextPageBtn" class="px-3 py-1 bg-law-navy text-white rounded-md disabled:bg-slate-300 disabled:text-slate-700 disabled:opacity-50" disabled>Próxima</button>
+                    <button id="endIndexPageBtn" class="px-3 py-1 bg-law-navy text-white rounded-md disabled:bg-slate-300 disabled:text-slate-700 disabled:opacity-50" disabled>Última</button>
                 </div>
             </div>
 
-            <div class="flex-grow overflow-y-auto scroll-area"> 
-
-                <div class="overflow-x-auto rounded-lg shadow-md border border-slate-200">
-                    <table id="tabelaResultados" class="min-w-full divide-y divide-slate-200 table-fixed">
-                        <thead>
+            <div class="flex-grow overflow-auto scroll-area">
+                <div class="overflow-x-auto rounded-lg shadow-md border border-slate-200 bg-white">
+                    <table id="tabelaResultados" class="min-w-full table-fixed text-sm">
+                        <colgroup>
+                            <col class="col-ano" />
+                            <col class="col-numero" />
+                            <col class="col-tipo" />
+                            <col class="col-categoria" />
+                            <col class="col-descricao" />
+                            <col class="col-link" />
+                        </colgroup>
+                        <thead class="sticky top-0 z-10">
                             <tr>
-                                <th class="rounded-tl-lg">Ano</th>
-                                <th>Número</th>
-                                <th>Tipo</th>
-                                <th>Categoria</th>
-                                <th>Descrição</th>
-                                <th class="rounded-tr-lg">Link</th>
+                                <th data-column="ano" class="bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-tl-lg">
+                                    <div class="flex items-center gap-2">
+                                        <span>Ano</span><span class="sort-indicator" data-column="ano"></span>
+                                    </div>
+                                </th>
+                                <th data-column="numero" class="bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider">
+                                    <div class="flex items-center gap-2">
+                                        <span>Número</span><span class="sort-indicator" data-column="numero"></span>
+                                    </div>
+                                </th>
+                                <th data-column="tipo" class="bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider">Tipo</th>
+                                <th data-column="categoria" class="bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider">Categoria</th>
+                                <th data-column="descrição" class="bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider">Descrição</th>
+                                <th class="bg-gradient-to-r from-law-navy to-law-navy2 text-white font-bold text-xs sm:text-sm uppercase tracking-wider rounded-tr-lg">Ação</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody id="resultsBody">
+                            <tr><td colspan="6" class="text-center text-slate-500 py-8">Use os filtros ou a busca para encontrar normas.</td></tr>
+                        </tbody>
                     </table>
-                    <p id="noResultsMessage" class="text-slate-600 text-center py-8 hidden bg-white rounded-b-lg">Nenhuma lei encontrada.</p>
+                    <p id="noResultsMessage" class="text-slate-600 text-center py-8 hidden">Nenhuma lei encontrada.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pré-visualização modal -->
+        <div id="previewContainer" class="fixed inset-0 z-50 bg-black/60 hidden flex justify-center items-center p-4">
+            <div class="bg-white rounded-lg shadow-2xl w-full h-full max-w-7xl max-h-[90vh] flex flex-col relative">
+                <button id="closePreviewBtn" class="absolute top-3 right-3 bg-red-600 text-white p-2 rounded-full hover:bg-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                </button>
+
+                <div class="p-3 border-b border-slate-200 flex-shrink-0">
+                    <h3 id="previewTitle" class="text-lg font-semibold text-law-navy truncate">Pré-visualização do Documento</h3>
                 </div>
 
+                <iframe id="documentIframe" class="w-full flex-grow border-0 rounded-b-lg" frameborder="0" allowfullscreen></iframe>
+
+                <div id="previewError" class="absolute inset-0 bg-white/95 hidden flex flex-col justify-center items-center text-center p-8 rounded-lg">
+                    <p class="text-xl font-medium text-red-600 mb-4">🚫 Não foi possível carregar a pré-visualização.</p>
+                    <p class="text-slate-600 mb-6">O arquivo pode não ser público, não ser compatível ou o link não é embeddable.</p>
+                    <a id="externalLinkBtn" target="_blank" class="bg-law-gold hover:bg-law-navy text-white font-semibold py-3 px-6 rounded-full transition shadow-md">Abrir em nova aba</a>
+                </div>
             </div>
-            </div>
-        </div> 
+        </div>
+
+        <footer class="w-full mt-4 py-4 border-t border-slate-300 flex-shrink-0">
+            <p class="text-center text-slate-500 text-xs font-medium">
+                Sistema de Consulta do Acervo Normativo Municipal<strong class="text-law-navy">© 2025 – Coordenadoria do Sistema de Controle Interno</strong>
+            </p>
+        </footer>
+    </div>
 
     <script>
-        // URL da planilha CSV fornecido pelo usuário
+        // === CONFIGURAÇÕES ===
         const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ7ollrDhKhlyCtPnTQsMlFK2AmzNXA32LM1P7pvCzuJvaW6c23glm5-wbJWjrdzAKWydX2W81NidKK/pub?output=csv";
-        let allLaws = []; // Armazena todos os dados carregados
-        let filteredLaws = []; // Armazena os dados após a filtragem de busca
+
+        // Estado
+        let allLaws = [];
+        let filteredLaws = [];
         let currentPage = 1;
-        let itemsPerPage = 10; // Valor inicial
+        let itemsPerPage = 10;
+        let columnMap = {};
+        let sortColumn = "ano";
+        let sortOrder = "desc";
+        let searchInitiated = true;
+        let activeCategory = "";
 
-        const tabelaResultadosBody = document.querySelector("#tabelaResultados tbody");
-        const resultsCountSpan = document.getElementById("resultsCount");
-        const loadingMessage = document.getElementById("loadingMessage");
-        const errorMessage = document.getElementById("errorMessage");
-        const noResultsMessage = document.getElementById("noResultsMessage");
-        const localFileWarning = document.getElementById("localFileWarning");
+        // DOM
+        const searchNomeInput = document.getElementById('searchNome');
+        const searchButton = document.getElementById('searchButton');
+        const searchContainer = document.getElementById('searchContainer');
 
-        // Elementos de paginação
-        const itemsPerPageSelect = document.getElementById("itemsPerPage");
-        const startIndexPageBtn = document.getElementById("startIndexPageBtn");
-        const prevPageBtn = document.getElementById("prevPageBtn");
-        const nextPageBtn = document.getElementById("nextPageBtn");
-        const pageInfoSpan = document.getElementById("pageInfo");
-        const endIndexPageBtn = document.getElementById("endIndexPageBtn");
+        const toggleFiltersBtn = document.getElementById('toggleFiltersBtn');
+        const filterContent = document.getElementById('filterContent');
+        const filterIcon = document.getElementById('filterIcon');
 
-        // Adição dos novos elementos de filtro
-        const anoInput = document.getElementById("ano");
-        const tipoSelect = document.getElementById("tipo");
-        const categoriaSelect = document.getElementById("categoria");
-        const palavraInput = document.getElementById("palavra");
+        const categoryButtonsContainer = document.getElementById('categoryButtonsContainer');
 
+        const anoInput = document.getElementById('ano');
+        const tipoSelect = document.getElementById('tipo');
+        const categoriaSelect = document.getElementById('categoria');
+        const palavraInput = document.getElementById('palavra');
 
-        // Função para exibir mensagens de erro
+        const resultsBody = document.getElementById('resultsBody');
+        const resultsCountSpan = document.getElementById('resultsCount');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        const localFileWarning = document.getElementById('localFileWarning');
+
+        const itemsPerPageSelect = document.getElementById('itemsPerPage');
+        const startIndexPageBtn = document.getElementById('startIndexPageBtn');
+        const prevPageBtn = document.getElementById('prevPageBtn');
+        const nextPageBtn = document.getElementById('nextPageBtn');
+        const endIndexPageBtn = document.getElementById('endIndexPageBtn');
+        const pageInfoSpan = document.getElementById('pageInfo');
+
+        const previewContainer = document.getElementById('previewContainer');
+        const closePreviewBtn = document.getElementById('closePreviewBtn');
+        const documentIframe = document.getElementById('documentIframe');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewError = document.getElementById('previewError');
+        const externalLinkBtn = document.getElementById('externalLinkBtn');
+
+        const sortIndicators = document.querySelectorAll(".sort-indicator");
+
+        // Utils
+        const escapeHTML = (str = "") =>
+            String(str).replace(/[&<>"'`=\/]/g, s => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;","/":"&#x2F;","`":"&#x60;","=":"&#x3D;" }[s]));
+
+        const normalize = (s = "") =>
+            String(s).normalize ? String(s).normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase() : String(s).toLowerCase();
+
+        const highlightText = (text = "", query = "") => {
+            if (!query) return escapeHTML(text);
+            const q = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            return escapeHTML(text).replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
+        };
+
         function showErrorMessage(message) {
             errorMessage.textContent = message;
-            errorMessage.classList.remove('hidden');
-            loadingMessage.classList.add('hidden');
-            noResultsMessage.classList.add('hidden');
+            errorMessage.classList.remove("hidden");
+            loadingMessage.classList.add("hidden");
+            noResultsMessage.classList.add("hidden");
         }
+        function hideErrorMessage() { errorMessage.classList.add("hidden"); }
 
-        // Função para ocultar mensagens de erro
-        function hideErrorMessage() {
-            errorMessage.classList.add('hidden');
-        }
-
-        async function carregarDados() {
-            loadingMessage.classList.remove('hidden');
-            hideErrorMessage();
-            tabelaResultadosBody.innerHTML = ''; // Limpa resultados anteriores
-            resultsCountSpan.textContent = '0';
-            noResultsMessage.classList.add('hidden'); // Esconde a mensagem de "nenhuma lei" enquanto carrega
-
-            // Verifica se o arquivo está sendo aberto localmente e exibe o aviso
-            if (window.location.protocol === 'file:') {
-                localFileWarning.classList.remove('hidden');
-                showErrorMessage('Falha ao carregar a planilha. Restrição de segurança do navegador (CORS).');
-                // Colspan ajustado para 6 colunas (Ano, Número, Tipo, Categoria, Descrição, Link)
-                tabelaResultadosBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 py-4">Erro: Execute em um servidor web.</td></tr>`;
-                return; // Impede a tentativa de fetch se for um arquivo local
-            } else {
-                localFileWarning.classList.add('hidden');
-            }
-
-            try {
-                const resposta = await fetch(URL_CSV);
-                if (!resposta.ok) {
-                    throw new Error(`Erro de rede ou URL inválido: ${resposta.status} ${resposta.statusText}`);
-                }
-                const rawCsvText = await resposta.text();
-                allLaws = csvParaJSON(rawCsvText);
-                console.log("✅ Dados carregados:", allLaws);
-                buscarLeis(); // Filtra e exibe os dados (inicia na primeira página)
-            } catch (error) {
-                console.error("Erro ao carregar dados:", error);
-                showErrorMessage(`Falha ao carregar a planilha: ${error.message}. Verifique o URL e as permissões de publicação.`);
-                // Colspan ajustado para 6 colunas
-                tabelaResultadosBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 py-4">Erro ao carregar dados.</td></tr>`;
-                resultsCountSpan.textContent = '0';
-            } finally {
-                loadingMessage.classList.add('hidden');
-            }
-        }
-
+        // CSV -> JSON (procura pelo cabeçalho 'ano' a partir da linha 0..10)
         function csvParaJSON(csv) {
-            const linhas = csv.split("\n")
-                .map(l => l.trim())
-                .filter(l => l);
+            const linhas = csv.split("\n").map(l => l.replace(/\r$/, "")).filter(Boolean);
+            if (!linhas.length) return [];
 
-            if (linhas.length === 0) return [];
-
-            const linhaCabecalhoIndex = linhas.findIndex((l, index) => index >= 4 && l.toLowerCase().includes("ano"));
-            if (linhaCabecalhoIndex === -1) {
-                console.error("Cabeçalho 'ano' não encontrado no CSV a partir da linha 5.");
+            // Tentativa robusta de localizar a linha de cabeçalho (procura 'ano' ou 'ano' com acentos)
+            let headerIndex = -1;
+            for (let i = 0; i < Math.min(10, linhas.length); i++) {
+                const cols = linhas[i].toLowerCase();
+                if (cols.includes("ano")) { headerIndex = i; break; }
+            }
+            if (headerIndex === -1) {
+                // fallback: procura em todas as linhas
+                for (let i = 0; i < linhas.length; i++) {
+                    if (linhas[i].toLowerCase().includes("ano")) { headerIndex = i; break; }
+                }
+            }
+            if (headerIndex === -1) {
+                showErrorMessage("Cabeçalho 'ANO' não encontrado na planilha.");
                 return [];
             }
 
-            const cabecalhos = linhas[linhaCabecalhoIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-                                     .map(h => h.replace(/^"|"$/g, "").trim().toLowerCase());
+            const headerCols = linhas[headerIndex].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(h => h.replace(/^"|"$/g,"").trim().toLowerCase());
+            // Mapeia colunas relevantes
+            columnMap = {
+                ano: headerCols.find(h => h === "ano"),
+                numero: headerCols.find(h => h === "número" || h === "numero" || h === "nº"),
+                tipo: headerCols.find(h => h.includes("tipo")),
+                categoria: headerCols.find(h => h.includes("categoria")),
+                descricao: headerCols.find(h => h.includes("descri") || h.includes("ementa") || h === "nome"),
+                link: headerCols.find(h => h.includes("link")),
+            };
 
-            console.log("Cabeçalhos CSV normalizados:", cabecalhos);
-
-            return linhas.slice(linhaCabecalhoIndex + 1).map(linha => {
-                const valores = linha.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            // Normaliza e monta objetos
+            const data = linhas.slice(headerIndex + 1).map(l => {
+                const vals = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 const obj = {};
-                cabecalhos.forEach((coluna, i) => {
-                    obj[coluna] = valores[i] ? valores[i].replace(/^"|"$/g, "").trim() : "";
+                headerCols.forEach((col, i) => {
+                    obj[col] = vals[i] ? vals[i].replace(/^"|"$/g,"").trim() : "";
                 });
                 return obj;
             });
+
+            // Remove linhas vazias e retorna
+            return data.filter(row => {
+                // Considera útil se tiver pelo menos ano ou link ou descrição
+                const anoVal = columnMap.ano ? (row[columnMap.ano] || "") : "";
+                const descVal = columnMap.descricao ? (row[columnMap.descricao] || "") : "";
+                const linkVal = columnMap.link ? (row[columnMap.link] || "") : "";
+                return (anoVal || descVal || linkVal);
+            });
         }
 
+        // Carrega CSV
+        async function carregarDados() {
+            loadingMessage.classList.remove("hidden");
+            hideErrorMessage();
+            resultsCountSpan.textContent = "0";
+            noResultsMessage.classList.add("hidden");
+            resultsBody.innerHTML = "";
+
+            if (window.location.protocol === "file:") {
+                localFileWarning.classList.remove("hidden");
+            } else {
+                localFileWarning.classList.add("hidden");
+            }
+
+            try {
+                const resp = await fetch(URL_CSV);
+                if (!resp.ok) throw new Error(`Erro de rede: ${resp.status} ${resp.statusText}`);
+                const csv = await resp.text();
+                allLaws = csvParaJSON(csv);
+                if (!allLaws.length) {
+                    showErrorMessage("Nenhum registro válido encontrado na planilha.");
+                    resultsBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 py-4">Nenhum registro válido.</td></tr>`;
+                    return;
+                }
+
+                // Criar botões de categoria (a partir do campo 'tipo' quando disponível)
+                criarBotoesDeCategoria();
+
+                // Inicializa busca/ordenacao
+                searchInitiated = true;
+                buscarLeis();
+            } catch (err) {
+                console.error(err);
+                showErrorMessage(`Falha ao carregar a planilha: ${err.message}`);
+                resultsBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-600 py-4">Erro ao carregar dados.</td></tr>`;
+            } finally {
+                loadingMessage.classList.add("hidden");
+            }
+        }
+
+        // Criação dinâmica de botões (tipo)
+        function criarBotoesDeCategoria() {
+            if (!columnMap.tipo) return;
+            const tipos = [...new Set(allLaws.map(r => (r[columnMap.tipo] || "").trim()).filter(Boolean))].sort((a,b)=> a.localeCompare(b, 'pt-BR'));
+            categoryButtonsContainer.innerHTML = "";
+            const btnAll = criarBotaoCategoria("Todos os Documentos", "");
+            categoryButtonsContainer.appendChild(btnAll);
+            tipos.forEach(t => {
+                const btn = criarBotaoCategoria(t, t);
+                categoryButtonsContainer.appendChild(btn);
+            });
+            // marca 'Todos' ativo
+            const firstBtn = categoryButtonsContainer.querySelector(".btn-category[value='']");
+            if (firstBtn) firstBtn.classList.add("active", "bg-law-gold", "text-white");
+        }
+
+        function criarBotaoCategoria(label, value) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = label;
+            button.value = value;
+            button.className = "btn-category bg-slate-200 hover:bg-law-gold/80 text-slate-800 font-semibold py-2 px-3 rounded-full transition text-sm whitespace-nowrap";
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".btn-category").forEach(b => b.classList.remove("active", "bg-law-gold", "text-white"));
+                button.classList.add("active", "bg-law-gold", "text-white");
+                activeCategory = value;
+                currentPage = 1;
+                sortColumn = "ano";
+                sortOrder = "desc";
+                searchInitiated = true;
+                buscarLeis();
+            });
+            return button;
+        }
+
+        // Lógica de filtragem
         function buscarLeis() {
             const anoFiltro = anoInput.value.trim();
             const tipoFiltro = tipoSelect.value.trim().toLowerCase();
             const categoriaFiltro = categoriaSelect.value.trim().toLowerCase();
-            const palavraFiltro = palavraInput.value.trim().toLowerCase();
+            const palavraFiltro = (palavraInput.value || searchNomeInput.value || "").trim().toLowerCase();
+            const activeCategoryFiltro = activeCategory ? activeCategory.toLowerCase() : "";
 
             filteredLaws = allLaws.filter(item => {
-                const anoDoItem = item["ano"] || "";
-                const descricaoDoItem = item["descrição"] || "";
-                
-                const tipoDoItem = (item["tipo"] || "").toLowerCase();
-                const categoriaDoItem = (item["categoria"] || "").toLowerCase();
+                const anoDoItem = columnMap.ano ? (item[columnMap.ano] || "") : "";
+                const numeroDoItem = columnMap.numero ? (item[columnMap.numero] || "") : "";
+                const tipoDoItem = columnMap.tipo ? (item[columnMap.tipo] || "") : "";
+                const categoriaDoItem = columnMap.categoria ? (item[columnMap.categoria] || "") : "";
+                const descricaoDoItem = columnMap.descricao ? (item[columnMap.descricao] || "") : "";
 
-                const anoOk = !anoFiltro || (anoDoItem === anoFiltro);
-                const tipoOk = !tipoFiltro || (tipoDoItem === tipoFiltro);
-                const categoriaOk = !categoriaFiltro || (categoriaDoItem === categoriaFiltro);
-                const palavraOk = !palavraFiltro || descricaoDoItem.toLowerCase().includes(palavraFiltro);
+                const anoOk = !anoFiltro || (String(anoDoItem) === anoFiltro);
+                const tipoOk = !tipoFiltro || (String(tipoDoItem).toLowerCase() === tipoFiltro);
+                const categoriaOk = !categoriaFiltro || (String(categoriaDoItem).toLowerCase() === categoriaFiltro);
+                const activeCatOk = !activeCategoryFiltro || (String(tipoDoItem).toLowerCase() === activeCategoryFiltro);
+                const palavraOk = !palavraFiltro || (
+                    String(descricaoDoItem).toLowerCase().includes(palavraFiltro) ||
+                    String(numeroDoItem).toLowerCase().includes(palavraFiltro) ||
+                    String(anoDoItem).toLowerCase().includes(palavraFiltro)
+                );
 
-                return anoOk && tipoOk && categoriaOk && palavraOk;
+                return anoOk && tipoOk && categoriaOk && activeCatOk && palavraOk;
             });
 
-            currentPage = 1; // Reseta para a primeira página ao fazer uma nova busca
+            currentPage = 1;
+            ordenarDados(sortColumn, undefined);
+        }
+
+        // Ordenacao
+        function ordenarDados(column, order) {
+            if (!column) return;
+            // define defaults
+            if (column !== sortColumn) {
+                sortColumn = column;
+                sortOrder = (column === "ano" || column === "numero") ? "desc" : "asc";
+            } else if (order === undefined) {
+                sortOrder = sortOrder === "asc" ? "desc" : "asc";
+            } else {
+                sortOrder = order;
+            }
+
+            // Verifica se temos mapeamento de coluna
+            const mapped = columnMap[column] || columnMap.descricao || Object.values(columnMap)[0];
+            if (!mapped) {
+                exibirLeisPaginadas();
+                return;
+            }
+
+            filteredLaws.sort((a,b) => {
+                const A_raw = String(a[mapped] || "").toLowerCase();
+                const B_raw = String(b[mapped] || "").toLowerCase();
+                let res = 0;
+                if (column === "ano" || column === "numero") {
+                    const A = parseInt(A_raw.replace(/[^\d]/g,''),10) || 0;
+                    const B = parseInt(B_raw.replace(/[^\d]/g,''),10) || 0;
+                    res = A - B;
+                } else {
+                    res = A_raw.localeCompare(B_raw, 'pt-BR');
+                }
+                return sortOrder === "asc" ? res : -res;
+            });
+
             exibirLeisPaginadas();
         }
 
+        function updateSortIndicators() {
+            sortIndicators.forEach(ind => {
+                const col = ind.getAttribute('data-column');
+                ind.textContent = "";
+                if (col === sortColumn && filteredLaws.length > 0) ind.textContent = sortOrder === "asc" ? " ▲" : " ▼";
+            });
+        }
+
+        // Render paginado
         function exibirLeisPaginadas() {
-            tabelaResultadosBody.innerHTML = "";
+            resultsBody.innerHTML = "";
             noResultsMessage.classList.add('hidden');
 
-            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
-            pageInfoSpan.textContent = `Página ${currentPage} de ${totalPages || 1}`;
+            const totalPages = Math.max(1, Math.ceil(filteredLaws.length / itemsPerPage));
+            currentPage = Math.max(1, Math.min(currentPage, totalPages));
+            pageInfoSpan.textContent = `Página ${currentPage} de ${totalPages}`;
 
-            // Controla o estado dos botões de navegação
             startIndexPageBtn.disabled = currentPage === 1 || filteredLaws.length === 0;
             prevPageBtn.disabled = currentPage === 1 || filteredLaws.length === 0;
             nextPageBtn.disabled = currentPage === totalPages || filteredLaws.length === 0;
             endIndexPageBtn.disabled = currentPage === totalPages || filteredLaws.length === 0;
 
+            updateSortIndicators();
+
             if (filteredLaws.length === 0) {
                 noResultsMessage.classList.remove('hidden');
                 resultsCountSpan.textContent = '0';
+                resultsBody.innerHTML = `<tr><td colspan="6" class="text-center py-8">Nenhuma lei encontrada.</td></tr>`;
                 return;
             }
 
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const lawsToDisplay = filteredLaws.slice(startIndex, endIndex);
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageItems = filteredLaws.slice(start, end);
 
-            const palavraFiltro = palavraInput.value.trim(); // Pega o valor atual do filtro de palavra-chave
+            const palavraFiltro = (palavraInput.value || searchNomeInput.value || "").trim();
 
-            lawsToDisplay.forEach((item, idx) => {
-                const linha = document.createElement("tr");
-                const bgClass = idx % 2 === 0 ? "bg-white" : "bg-slate-50";
+            pageItems.forEach((item, idx) => {
+                const ano = columnMap.ano ? (item[columnMap.ano] || "") : "";
+                const numero = columnMap.numero ? (item[columnMap.numero] || item["nº"] || "") : "";
+                const tipo = columnMap.tipo ? (item[columnMap.tipo] || "") : "";
+                const categoria = columnMap.categoria ? (item[columnMap.categoria] || "") : "";
+                const descricao = columnMap.descricao ? (item[columnMap.descricao] || "") : "";
+                const link = columnMap.link ? (item[columnMap.link] || "") : (item["link"] || item["link da lei"] || "");
 
-                let descricaoFormatada = item["descrição"] || "";
+                const tr = document.createElement("tr");
+                tr.className = idx % 2 === 0 ? "bg-white hover:bg-amber-50 transition-colors" : "bg-slate-50 hover:bg-amber-50 transition-colors";
 
-                // Aplica o destaque APENAS se houver uma palavra-chave para filtrar
-                if (palavraFiltro) {
-                    // Cria uma expressão regular para encontrar a palavra-chave (ignorando maiúsculas/minúsculas)
-                    // `g` para todas as ocorrências, `i` para case-insensitive
-                    const regex = new RegExp(palavraFiltro, 'gi'); 
-                    // Substitui as ocorrências encontradas pela mesma palavra envolvida em <mark>
-                    descricaoFormatada = descricaoFormatada.replace(regex, (match) => `<mark>${match}</mark>`);
-                }
+                // destaque
+                const highlightedDescricao = highlightText(descricao, palavraFiltro);
+                const highlightedNumero = highlightText(numero, palavraFiltro);
+                const highlightedAno = highlightText(ano, palavraFiltro);
 
-                linha.className = `${bgClass} hover:bg-slate-100 transition-colors`;
-                linha.innerHTML = `
-                    <td class="py-3 pr-4 font-semibold text-slate-800">${item["ano"] || ""}</td>
-                    <td class="py-3 text-slate-700">${item["número"] || item["numero"] || ""}</td>
-                    <td class="py-3 text-slate-700">${item["tipo"] || ""}</td>
-                    <td class="py-3 text-slate-700">${item["categoria"] || ""}</td>
-                    <td class="py-3 text-slate-700 break-words">${descricaoFormatada}</td>
-                    <td class="py-3">
-                        <a href="${item["link da lei"] || item["link"] || "#"}" target="_blank"
-                           class="inline-flex items-center justify-center gap-1 bg-law-navy hover:bg-law-navy2 active:bg-law-navy2 text-white font-semibold py-2 px-4 rounded-md shadow-md hover:shadow-lg transition-all duration-200 ease-in-out text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L14.414 5A2 2 0 0115 6.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1-3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-                            </svg>
-                            Acessar
-                        </a>
+                // decide se botão preview é embeddable
+                const embedUrl = convertToEmbedUrl(link);
+                const isEmbeddable = embedUrl && embedUrl !== link;
+
+                tr.innerHTML = `
+                    <td class="py-3 pr-4 font-semibold text-slate-800 text-center">${highlightedAno}</td>
+                    <td class="py-3 text-slate-700 text-center">${highlightedNumero}</td>
+                    <td class="py-3 text-slate-700">${escapeHTML(tipo)}</td>
+                    <td class="py-3 text-slate-700">${escapeHTML(categoria)}</td>
+                    <td class="py-3 text-slate-700 break-words">${highlightedDescricao}</td>
+                    <td class="py-3 pr-4 pl-2 text-center">
+                        <div class="flex flex-col sm:flex-row gap-2 items-center justify-center">
+                            ${isEmbeddable ? `<button data-link="${escapeHTML(link)}" data-title="${escapeHTML(descricao || numero || 'Documento')}" class="preview-btn inline-flex items-center justify-center gap-2 bg-law-gold hover:bg-law-gold/90 text-white font-semibold py-2 px-3 rounded-md text-xs sm:text-sm">Visualizar</button>` : ''}
+                            <a href="${escapeHTML(link || '#')}" target="_blank" class="inline-flex items-center justify-center gap-2 bg-law-navy hover:bg-law-navy2 text-white font-semibold py-2 px-3 rounded-md text-xs sm:text-sm ${isEmbeddable ? 'bg-opacity-90' : ''}">
+                                Acessar
+                            </a>
+                        </div>
                     </td>
                 `;
-                tabelaResultadosBody.appendChild(linha);
+                resultsBody.appendChild(tr);
             });
+
             resultsCountSpan.textContent = filteredLaws.length;
+            // rolar para topo do painel de resultados
+            resultsBody.closest('.scroll-area')?.scrollTo({ top: 0, behavior: 'smooth' });
+            addPreviewListeners();
         }
 
-        // Event Listeners para os campos de busca e seleção (atualizados)
-        anoInput.addEventListener("input", buscarLeis);
-        tipoSelect.addEventListener("change", buscarLeis);
-        categoriaSelect.addEventListener("change", buscarLeis);
-        palavraInput.addEventListener("input", buscarLeis);
-        
-        // Event Listener para o seletor de itens por página
-        itemsPerPageSelect.addEventListener("change", (e) => {
-            itemsPerPage = parseInt(e.target.value);
-            currentPage = 1; // Volta para a primeira página ao mudar o número de itens por página
-            exibirLeisPaginadas();
-        });
+        // Convert Drive link para embed (preview)
+        function convertToEmbedUrl(link) {
+            if (!link || typeof link !== 'string') return null;
+            // procura id: id=... ou /d/...
+            const m1 = link.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            const m2 = link.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || link.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            const fileId = (m1 && m1[1]) || (m2 && m2[1]);
+            if (fileId) return `https://drive.google.com/file/d/${fileId}/preview`;
+            // também trata links do docs.google.com/document/d/ -> export? or preview
+            const m3 = link.match(/\/document\/d\/([a-zA-Z0-9_-]+)/);
+            if (m3 && m3[1]) return `https://docs.google.com/document/d/${m3[1]}/preview`;
+            return link; // se não reconheceu retorna o próprio link
+        }
 
-        // Event Listeners para os botões de paginação
-        startIndexPageBtn.addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage = 1;
-                exibirLeisPaginadas();
+        // Preview listeners
+        function addPreviewListeners() {
+            document.querySelectorAll('.preview-btn').forEach(btn => {
+                btn.removeEventListener('click', previewClickHandler);
+                btn.addEventListener('click', previewClickHandler);
+            });
+        }
+        function previewClickHandler(e) {
+            const link = e.currentTarget.getAttribute('data-link');
+            const title = e.currentTarget.getAttribute('data-title');
+            openPreview(link, title);
+        }
+
+        function openPreview(link, title) {
+            const embedUrl = convertToEmbedUrl(link);
+            previewTitle.textContent = title || "Pré-visualização do Documento";
+            previewError.classList.add('hidden');
+            documentIframe.src = "";
+            if (embedUrl && embedUrl !== link) {
+                documentIframe.src = embedUrl;
+            } else {
+                previewError.classList.remove('hidden');
+            }
+            previewContainer.classList.remove('hidden');
+            externalLinkBtn.href = link || "#";
+        }
+
+        closePreviewBtn.addEventListener('click', () => {
+            previewContainer.classList.add('hidden');
+            documentIframe.src = "";
+        });
+        previewContainer.addEventListener('click', (e) => {
+            if (e.target === previewContainer) {
+                previewContainer.classList.add('hidden');
+                documentIframe.src = "";
             }
         });
 
-        prevPageBtn.addEventListener("click", () => {
-            if (currentPage > 1) {
-                currentPage--;
-                exibirLeisPaginadas();
+        // Search expand/collapse behavior
+        function expandSearch() { searchContainer.classList.add('expanded'); searchNomeInput.focus(); }
+        function collapseSearch() { if (searchNomeInput.value === '') searchContainer.classList.remove('expanded'); }
+
+        searchButton.addEventListener('click', () => {
+            if (!searchContainer.classList.contains('expanded')) expandSearch();
+            else {
+                if (searchNomeInput.value.trim() !== '') { searchInitiated = true; buscarLeis(); }
+                else collapseSearch();
             }
         });
 
-        nextPageBtn.addEventListener("click", () => {
-            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                exibirLeisPaginadas();
-            }
+        searchNomeInput.addEventListener('input', () => {
+            if (searchNomeInput.value.trim() !== '' || activeCategory !== '') searchInitiated = true; else searchInitiated = false;
+            // sincroniza com campo palavra (opcional) -> não sobrescreve campo palavra se usuário já digitou lá
+            if (!palavraInput.value) palavraInput.value = searchNomeInput.value;
+            buscarLeis();
+        });
+        searchNomeInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); if (searchNomeInput.value.trim() !== '') { searchInitiated = true; buscarLeis(); } else collapseSearch(); }
+        });
+        searchNomeInput.addEventListener('blur', collapseSearch);
+
+        // Toggle filtros
+        toggleFiltersBtn.addEventListener('click', () => {
+            const isHidden = filterContent.classList.contains('hidden');
+            if (isHidden) { filterContent.classList.remove('hidden'); filterIcon.classList.add('rotate-180'); }
+            else { filterContent.classList.add('hidden'); filterIcon.classList.remove('rotate-180'); }
         });
 
-        // Event Listener para o botão "Última"
-        endIndexPageBtn.addEventListener("click", () => {
-            const totalPages = Math.ceil(filteredLaws.length / itemsPerPage);
-            if (currentPage < totalPages) {
-                currentPage = totalPages;
-                exibirLeisPaginadas();
-            }
+        // Listeners campos
+        anoInput.addEventListener('input', buscarLeis);
+        tipoSelect.addEventListener('change', buscarLeis);
+        categoriaSelect.addEventListener('change', buscarLeis);
+        palavraInput.addEventListener('input', () => { if (!searchNomeInput.value) searchNomeInput.value = palavraInput.value; buscarLeis(); });
+
+        // Paginação
+        itemsPerPageSelect.addEventListener('change', (e) => { itemsPerPage = parseInt(e.target.value,10); currentPage = 1; exibirLeisPaginadas(); });
+        startIndexPageBtn.addEventListener('click', () => { currentPage = 1; exibirLeisPaginadas(); });
+        prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; exibirLeisPaginadas(); }});
+        nextPageBtn.addEventListener('click', () => { const t = Math.ceil(filteredLaws.length / itemsPerPage); if (currentPage < t) { currentPage++; exibirLeisPaginadas(); }});
+        endIndexPageBtn.addEventListener('click', () => { const t = Math.ceil(filteredLaws.length / itemsPerPage); currentPage = t || 1; exibirLeisPaginadas(); });
+
+        // Ordenação ao clicar no cabeçalho
+        document.querySelectorAll('th[data-column]').forEach(h => {
+            h.addEventListener('click', (e) => {
+                const column = e.currentTarget.getAttribute('data-column');
+                const order = (column === sortColumn) ? (sortOrder === 'asc' ? 'desc' : 'asc') : undefined;
+                ordenarDados(column, order);
+            });
         });
 
-        // Carrega os dados ao iniciar a página
+        // Inicialização
         carregarDados();
+
+        // Faz a busca inicial ao carregar CSV
     </script>
-    <footer class="w-full max-w-7xl mt-4 py-4 border-t border-slate-300 flex-shrink-0">
-    <p class="text-center text-slate-500 text-xs font-medium">
-        Sistema de Consulta de Normas Municipais <strong class="text-law-navy">© 2025 – Desenvolvido pela equipe técnica da Coordenadoria de Controle Interno</strong>
-    </p>
-</footer>
 </body>
 </html>
-
