@@ -75,7 +75,7 @@
             z-index: 20;
             position: absolute;
             right: 0;
-            top: 0;
+            top: 00;
         }
         #searchNome {
             flex-grow: 1;
@@ -157,7 +157,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                     <label class="text-slate-700 text-sm font-semibold mb-1 block">Ano</label>
-                    <input id="ano" type="text" placeholder="Ex: 2025" class="p-3 border border-slate-300 rounded-lg w-full" />
+                    <input id="ano" type="number" placeholder="Ex: 2025" class="p-3 border border-slate-300 rounded-lg w-full" />
                 </div>
                 <div>
                     <label class="text-slate-700 text-sm font-semibold mb-1 block">Tipo</label>
@@ -378,6 +378,7 @@
             return escapeHTML(text).replace(new RegExp(`(${q})`, "gi"), "<mark>$1</mark>");
         };
 
+
         function showErrorMessage(message) {
             errorMessage.textContent = message;
             errorMessage.classList.remove("hidden");
@@ -513,6 +514,21 @@
             });
             return button;
         }
+        
+        searchNomeInput.addEventListener('input', () => {
+    // AQUI ESTÁ A CORREÇÃO: Copia o valor COMPLETO, eliminando qualquer lógica antiga de "if"
+    palavraInput.value = searchNomeInput.value;
+    
+        // O resto da lógica de estado (mantida)
+    searchInitiated = searchNomeInput.value.trim() !== '' || activeCategory !== '';
+    
+   
+    
+    // Dispara a busca
+    buscarLeis();
+});
+        
+        
 
         // Lógica de filtragem
         function buscarLeis() {
